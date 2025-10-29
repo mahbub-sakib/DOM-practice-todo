@@ -2,6 +2,7 @@ const toggleBtn = document.querySelector('#theme-toggle-btn');
 const body = document.body;
 const taskList = document.getElementById('dynamic-section');
 const addCardBtn = document.getElementById('add-card-btn');
+const noTaskText = document.getElementById('no-task-text');
 
 // Theme Toggle
 toggleBtn.addEventListener('click', () => {
@@ -10,6 +11,14 @@ toggleBtn.addEventListener('click', () => {
         ? '☀️ Light Mode'
         : '🌙 Dark Mode';
 });
+
+function updateNoTaskText() {  // ✅ new function
+    if (taskList.children.length === 0) {
+        noTaskText.style.display = "block";
+    } else {
+        noTaskText.style.display = "none";
+    }
+}
 
 function createTask() {
     const task = document.createElement('div');
@@ -25,15 +34,19 @@ function createTask() {
 
     removeBtn.addEventListener('click', () => {
         task.remove();
+        updateNoTaskText();
     });
 
     task.appendChild(input);
     task.appendChild(removeBtn);
     taskList.appendChild(task);
+
+    updateNoTaskText();
 }
 
 // Create initial task
 createTask();
+updateNoTaskText();
 
 // Add new task button
 addCardBtn.addEventListener('click', createTask);

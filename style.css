@@ -194,3 +194,10 @@ button {
     background: #333;
     color: #fff;
 }
+
+.no-task {
+    text-align: center;
+    font-size: 18px;
+    color: #777;
+    margin-top: 20px;
+}
