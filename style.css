@@ -201,3 +201,7 @@ button {
     color: #777;
     margin-top: 20px;
 }
+
+.hidden {
+    display: none;
+}

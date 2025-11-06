@@ -1,12 +1,8 @@
-'use strict';
-
 const toggleBtn = document.querySelector('#theme-toggle-btn');
 const body = document.body;
 const taskList = document.getElementById('dynamic-section');
 const addCardBtn = document.getElementById('add-card-btn');
 const noTaskText = document.getElementById('no-task-text');
-
-let first_cross_displayed = false;
 
 // Theme Toggle
 toggleBtn.addEventListener('click', () => {
@@ -21,6 +17,19 @@ function updateNoTaskText() {  // ✅ new function
         noTaskText.style.display = "block";
     } else {
         noTaskText.style.display = "none";
+    }
+}
+
+function checkSingleTask_and_handleRemoveBtn() {
+    const totalCards = document.getElementsByClassName("card").length;
+    const firstCard = document.querySelector(".card");
+    const firstCardBtn = firstCard.lastElementChild;
+    if (totalCards === 1) {
+        // console.log('1 ta card');
+        firstCardBtn.classList.add("hidden");
+    }
+    else if (totalCards > 1) {
+        firstCardBtn.classList.remove("hidden");
     }
 }
 
@@ -39,50 +48,22 @@ function createTask() {
     removeBtn.addEventListener('click', () => {
         task.remove();
         updateNoTaskText();
+        checkSingleTask_and_handleRemoveBtn();
     });
 
     task.appendChild(input);
-
-    const total_cards = document.getElementsByClassName("card").length;
-
-
-    if (total_cards !== 0) {
-        task.appendChild(removeBtn);
-    }
-
+    task.appendChild(removeBtn);
     taskList.appendChild(task);
 
-    if (total_cards > 0 && first_cross_displayed == false) {
-        // console.log("dhukse");
-        const first_card = document.querySelector(".card");
-
-        const xBtn = document.createElement('button');
-        xBtn.classList.add('remove-card-btn');
-        xBtn.textContent = "×";
-
-        xBtn.addEventListener('click', () => {
-            task.remove();
-            updateNoTaskText();
-        });
-
-        first_card.appendChild(xBtn);
-
-        first_cross_displayed = true;
-    }
-
     updateNoTaskText();
+
+    checkSingleTask_and_handleRemoveBtn();
 }
 
 // Create initial task
 createTask();
-
 updateNoTaskText();
-
-
+checkSingleTask_and_handleRemoveBtn();
 
 // Add new task button
 addCardBtn.addEventListener('click', createTask);
-
-document.addEventListener('keydown', function (e) {
-    console.log(e.key);
-})
