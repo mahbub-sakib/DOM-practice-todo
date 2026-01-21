@@ -62,7 +62,8 @@ function createTask(focus = true) {
     task.appendChild(input);
     task.appendChild(removeBtn);
     // taskList.appendChild(task);
-    taskList.insertBefore(task, addCardBtn);
+    // taskList.insertBefore(task, addCardBtn);
+    taskList.appendChild(task);
 
     updateNoTaskText();
 
