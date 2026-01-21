@@ -107,10 +107,10 @@ button {
 
 .add-card-btn,
 .remove-card-btn {
-    width: 40px;
+    width: 100px;
     height: 40px;
     border: none;
-    border-radius: 10%;
+    border-radius: 999px;
     font-size: 22px;
     font-weight: bold;
     cursor: pointer;
@@ -123,6 +123,7 @@ button {
     background-color: #2ecc71;
     /* Green */
     color: #fff;
+    margin: 10px auto;
 }
 
 .remove-card-btn {
