@@ -33,7 +33,7 @@ function checkSingleTask_and_handleRemoveBtn() {
     }
 }
 
-function createTask() {
+function createTask(focus = true) {
     const task = document.createElement('div');
     task.classList.add('card');
 
@@ -51,6 +51,14 @@ function createTask() {
         checkSingleTask_and_handleRemoveBtn();
     });
 
+    // Press Enter → create new task
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            createTask();
+        }
+    });
+
     task.appendChild(input);
     task.appendChild(removeBtn);
     // taskList.appendChild(task);
@@ -59,6 +67,11 @@ function createTask() {
     updateNoTaskText();
 
     checkSingleTask_and_handleRemoveBtn();
+
+    // Auto-focus new input
+    if (focus) {
+        input.focus();
+    }
 }
 
 // Create initial task
