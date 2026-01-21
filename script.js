@@ -4,15 +4,54 @@ const taskList = document.getElementById('dynamic-section');
 const addCardBtn = document.getElementById('add-card-btn');
 const noTaskText = document.getElementById('no-task-text');
 
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme === "dark") {
+    body.classList.add("dark-theme");
+    toggleBtn.textContent = "☀️ Light Mode";
+}
+
 // Theme Toggle
 toggleBtn.addEventListener('click', () => {
     body.classList.toggle('dark-theme');
-    toggleBtn.textContent = body.classList.contains('dark-theme')
-        ? '☀️ Light Mode'
-        : '🌙 Dark Mode';
+
+    const isDark = body.classList.contains('dark-theme');
+    toggleBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+
+    localStorage.setItem("theme", isDark ? "dark" : "light");
 });
 
-function updateNoTaskText() {  // ✅ new function
+function saveTasks() {
+    const tasks = [];
+    document.querySelectorAll(".card input").forEach(input => {
+        const value = input.value.trim();
+
+        if (value !== "") {
+            tasks.push(value);
+        }
+    });
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function loadTasks() {
+    const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    taskList.innerHTML = ""; // clear existing
+
+    if (savedTasks.length === 0) {
+        // Always show at least one empty task
+        createTask(false);
+        return;
+    }
+
+    savedTasks.forEach((taskText, index) => {
+        createTask(false, taskText);
+    });
+
+    updateNoTaskText();
+    checkSingleTask_and_handleRemoveBtn();
+}
+
+function updateNoTaskText() {
     if (taskList.children.length === 0) {
         noTaskText.style.display = "block";
     } else {
@@ -33,13 +72,16 @@ function checkSingleTask_and_handleRemoveBtn() {
     }
 }
 
-function createTask(focus = true) {
+function createTask(focus = true, value = "") {
     const task = document.createElement('div');
     task.classList.add('card');
 
     const input = document.createElement('input');
     input.type = "text";
     input.placeholder = "Write your task...";
+    input.value = value;
+
+    input.addEventListener("input", saveTasks);
 
     const removeBtn = document.createElement('button');
     removeBtn.classList.add('remove-card-btn');
@@ -47,6 +89,10 @@ function createTask(focus = true) {
 
     removeBtn.addEventListener('click', () => {
         task.remove();
+        saveTasks();
+        if (taskList.children.length === 0) {
+            createTask();
+        }
         updateNoTaskText();
         checkSingleTask_and_handleRemoveBtn();
     });
@@ -55,7 +101,11 @@ function createTask(focus = true) {
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            createTask();
+            // createTask();
+            if (input.value.trim() !== "") {
+                createTask();
+            }
+            saveTasks();
         }
     });
 
@@ -75,6 +125,8 @@ function createTask(focus = true) {
     }
 }
 
+
+loadTasks();
 // Create initial task
 createTask();
 updateNoTaskText();
