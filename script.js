@@ -4,6 +4,9 @@ const taskList = document.getElementById('dynamic-section');
 const addCardBtn = document.getElementById('add-card-btn');
 const noTaskText = document.getElementById('no-task-text');
 
+let editModal, editTextarea, saveEditBtn, cancelEditBtn, closeModalBtn;
+let currentEditingInput = null;
+
 const savedTheme = localStorage.getItem("theme");
 if (savedTheme === "dark") {
     body.classList.add("dark-theme");
@@ -40,6 +43,8 @@ function loadTasks() {
     if (savedTasks.length === 0) {
         // Always show at least one empty task
         createTask(false);
+        updateNoTaskText();
+        checkSingleTask_and_handleRemoveBtn();
         return;
     }
 
@@ -81,6 +86,11 @@ function createTask(focus = true, value = "") {
     input.placeholder = "Write your task...";
     input.value = value;
 
+    // Lock input if it already has value
+    if (value.trim() !== "") {
+        input.readOnly = true;
+    }
+
     input.addEventListener("input", saveTasks);
 
     const removeBtn = document.createElement('button');
@@ -109,7 +119,19 @@ function createTask(focus = true, value = "") {
         }
     });
 
+    const editBtn = document.createElement('button');
+    editBtn.textContent = "✏️";
+    editBtn.classList.add("edit-btn");
+
+    editBtn.addEventListener("click", () => {
+        currentEditingInput = input;
+        editTextarea.value = input.value;
+        editModal.classList.remove("hidden");
+        editTextarea.focus();
+    });
+
     task.appendChild(input);
+    task.appendChild(editBtn);
     task.appendChild(removeBtn);
     // taskList.appendChild(task);
     // taskList.insertBefore(task, addCardBtn);
@@ -128,9 +150,49 @@ function createTask(focus = true, value = "") {
 
 loadTasks();
 // Create initial task
-createTask();
+if (taskList.children.length === 0) {
+    createTask();
+}
 updateNoTaskText();
 checkSingleTask_and_handleRemoveBtn();
 
 // Add new task button
 addCardBtn.addEventListener('click', createTask);
+
+
+
+function saveEdit() {
+    if (!currentEditingInput) return;
+
+    const updatedValue = editTextarea.value.trim();
+    if (updatedValue !== "") {
+        currentEditingInput.value = updatedValue;
+        currentEditingInput.readOnly = true;
+        saveTasks();
+    }
+    closeModal();
+}
+
+function closeModal() {
+    editModal.classList.add("hidden");
+    currentEditingInput = null;
+}
+
+
+async function loadModal() {
+    const res = await fetch("modal.html");
+    const html = await res.text();
+    document.body.insertAdjacentHTML("beforeend", html);
+
+    editModal = document.getElementById("edit-modal");
+    editTextarea = document.getElementById("edit-textarea");
+    saveEditBtn = document.getElementById("save-edit");
+    cancelEditBtn = document.getElementById("cancel-edit");
+    closeModalBtn = document.getElementById("close-modal");
+
+    saveEditBtn.addEventListener("click", saveEdit);
+    cancelEditBtn.addEventListener("click", closeModal);
+    closeModalBtn.addEventListener("click", closeModal);
+}
+
+loadModal();

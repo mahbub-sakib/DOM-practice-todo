@@ -181,6 +181,20 @@ button {
     background-color: #c0392b;
 }
 
+.edit-btn {
+    background: transparent;
+    border: 2px solid #000;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 6px;
+}
+
+.dark-theme .edit-btn {
+    border-color: #fff;
+    color: #fff;
+}
+
 /* Dark mode card & button updates */
 .dark-theme .card {
     background-color: #1f1f1f;
