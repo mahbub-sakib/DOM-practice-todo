@@ -13,7 +13,7 @@ if (savedTheme === "dark") {
     toggleBtn.textContent = "☀️ Light Mode";
 }
 
-// Theme Toggle
+// ############################ Theme Toggle ############################
 toggleBtn.addEventListener('click', () => {
     body.classList.toggle('dark-theme');
 
@@ -23,6 +23,7 @@ toggleBtn.addEventListener('click', () => {
     localStorage.setItem("theme", isDark ? "dark" : "light");
 });
 
+// #################### save all tasks in localStorage ##################
 function saveTasks() {
     const tasks = [];
     document.querySelectorAll(".card input").forEach(input => {
@@ -35,6 +36,7 @@ function saveTasks() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
+// ################### load all tasks from localStorage #################
 function loadTasks() {
     const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
@@ -77,22 +79,26 @@ function checkSingleTask_and_handleRemoveBtn() {
     }
 }
 
+// ##################### Create a single task ###################
 function createTask(focus = true, value = "") {
     const task = document.createElement('div');
     task.classList.add('card');
 
+    // --- prepare input field ---
     const input = document.createElement('input');
     input.type = "text";
     input.placeholder = "Write your task...";
     input.value = value;
 
-    // Lock input if it already has value
+    // --- Lock input if it already has value ---
     if (value.trim() !== "") {
         input.readOnly = true;
     }
 
+    // --- need to add debounced time when taking input ---
     input.addEventListener("input", saveTasks);
 
+    // --- prepare remove button ---
     const removeBtn = document.createElement('button');
     removeBtn.classList.add('remove-card-btn');
     removeBtn.textContent = "×";
@@ -107,11 +113,10 @@ function createTask(focus = true, value = "") {
         checkSingleTask_and_handleRemoveBtn();
     });
 
-    // Press Enter → create new task
+    // --- Press Enter → create new task ---
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            // createTask();
             if (input.value.trim() !== "") {
                 createTask();
             }
@@ -119,6 +124,7 @@ function createTask(focus = true, value = "") {
         }
     });
 
+    // --- prepare edit button ---
     const editBtn = document.createElement('button');
     editBtn.textContent = "✏️";
     editBtn.classList.add("edit-btn");
@@ -133,15 +139,12 @@ function createTask(focus = true, value = "") {
     task.appendChild(input);
     task.appendChild(editBtn);
     task.appendChild(removeBtn);
-    // taskList.appendChild(task);
-    // taskList.insertBefore(task, addCardBtn);
     taskList.appendChild(task);
 
     updateNoTaskText();
-
     checkSingleTask_and_handleRemoveBtn();
 
-    // Auto-focus new input
+    // --- Auto-focus new input ---
     if (focus) {
         input.focus();
     }
@@ -149,18 +152,18 @@ function createTask(focus = true, value = "") {
 
 
 loadTasks();
-// Create initial task
+// --- Create initial task ---
 if (taskList.children.length === 0) {
     createTask();
 }
 updateNoTaskText();
 checkSingleTask_and_handleRemoveBtn();
 
-// Add new task button
+// --- Add new task button ---
 addCardBtn.addEventListener('click', createTask);
 
 
-
+// ##################### Save edited task ###################
 function saveEdit() {
     if (!currentEditingInput) return;
 
@@ -178,7 +181,9 @@ function closeModal() {
     currentEditingInput = null;
 }
 
-
+// ##################### modal loading function ###################
+// # this function need to be asynchronous as html directly can't #
+// # invoke external html file                                    # 
 async function loadModal() {
     const res = await fetch("modal.html");
     const html = await res.text();
