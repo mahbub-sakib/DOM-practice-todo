@@ -79,6 +79,37 @@ function checkSingleTask_and_handleRemoveBtn() {
     }
 }
 
+function getDragAfterElement(container, y) {
+    console.clear();
+
+    const draggableElements = [
+        ...container.querySelectorAll(".card:not(.dragging)")
+    ];
+
+    console.log("Mouse Y:", y);
+    console.log("Candidates:", draggableElements.length);
+
+    return draggableElements.reduce((closest, child, index) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        console.log(`Card ${index}`, {
+            top: box.top,
+            center: box.top + box.height / 2,
+            offset
+        });
+        console.log('offset of closest card: ', closest.offset);
+        // console.log('closest card: ', closest);
+        if (offset < 0 && offset > closest.offset) {
+            console.log("👉 New closest:", child);
+            return { offset, element: child };
+        } else {
+            // debugger;
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
 // ##################### Create a single task ###################
 function createTask(focus = true, value = "") {
     const task = document.createElement('div');
@@ -97,6 +128,11 @@ function createTask(focus = true, value = "") {
 
     // --- need to add debounced time when taking input ---
     input.addEventListener("input", saveTasks);
+
+    // --- prepare drag handle button ---
+    const dragHandle = document.createElement("span");
+    dragHandle.textContent = "☰";
+    dragHandle.classList.add("drag-handle");
 
     // --- prepare remove button ---
     const removeBtn = document.createElement('button');
@@ -136,10 +172,16 @@ function createTask(focus = true, value = "") {
         editTextarea.focus();
     });
 
+    task.appendChild(dragHandle);
     task.appendChild(input);
     task.appendChild(editBtn);
     task.appendChild(removeBtn);
+
+    task.draggable = true;
+
     taskList.appendChild(task);
+
+
 
     updateNoTaskText();
     checkSingleTask_and_handleRemoveBtn();
@@ -161,6 +203,9 @@ checkSingleTask_and_handleRemoveBtn();
 
 // --- Add new task button ---
 addCardBtn.addEventListener('click', createTask);
+
+
+
 
 
 // ##################### Save edited task ###################
@@ -201,3 +246,36 @@ async function loadModal() {
 }
 
 loadModal();
+
+
+taskList.addEventListener("dragstart", (e) => {
+    const card = e.target.closest(".card");
+    if (!card) return;
+
+    console.log('dragging started');
+    draggedCard = card;
+    card.classList.add("dragging");
+});
+
+taskList.addEventListener("dragend", () => {
+    if (draggedCard) {
+        draggedCard.classList.remove("dragging");
+        draggedCard = null;
+        saveTasks(); // save new order
+        console.log('dragging end');
+    }
+});
+
+taskList.addEventListener("dragover", (e) => {
+    e.preventDefault();
+
+    const afterElement = getDragAfterElement(taskList, e.clientY);
+    // console.log(e.clientX, e.clientY);
+    if (!draggedCard) return;
+
+    if (afterElement == null) {
+        taskList.appendChild(draggedCard);
+    } else {
+        taskList.insertBefore(draggedCard, afterElement);
+    }
+});

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Drag Events Demo</title>
+    <style>
+        #dragItem {
+            width: 120px;
+            height: 120px;
+            background: #4caf50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
+
+        #dropZone {
+            margin-top: 30px;
+            width: 300px;
+            height: 200px;
+            border: 3px dashed #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .active {
+            border-color: #4caf50;
+            background: #f1fff1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="dragItem" draggable="true">Drag me</div>
+
+    <div id="dropZone">Drop zone</div>
+
+    <ul id="list">
+        <li class="litem-1">Apple</li>
+        <li class="litem-2">Kathal</li>
+        <li class="litem-3">Mango</li>
+        <li class="litem-4">Banana</li>
+    </ul>
+
+    <script src="dragExample.js"></script>
+</body>
+
+</html>
