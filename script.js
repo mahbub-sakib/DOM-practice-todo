@@ -6,6 +6,9 @@ const noTaskText = document.getElementById('no-task-text');
 
 let editModal, editTextarea, saveEditBtn, cancelEditBtn, closeModalBtn;
 let currentEditingInput = null;
+let draggedCard = null;
+let activeDraggableTask = null;
+
 
 const savedTheme = localStorage.getItem("theme");
 if (savedTheme === "dark") {
@@ -134,6 +137,14 @@ function createTask(focus = true, value = "") {
     dragHandle.textContent = "☰";
     dragHandle.classList.add("drag-handle");
 
+    dragHandle.addEventListener("mousedown", () => {
+        task.draggable = true;
+    });
+
+    document.addEventListener("mouseup", () => {
+        task.draggable = false;
+    });
+
     // --- prepare remove button ---
     const removeBtn = document.createElement('button');
     removeBtn.classList.add('remove-card-btn');
@@ -177,7 +188,7 @@ function createTask(focus = true, value = "") {
     task.appendChild(editBtn);
     task.appendChild(removeBtn);
 
-    task.draggable = true;
+    task.draggable = false;
 
     taskList.appendChild(task);
 
@@ -258,24 +269,79 @@ taskList.addEventListener("dragstart", (e) => {
 });
 
 taskList.addEventListener("dragend", () => {
-    if (draggedCard) {
-        draggedCard.classList.remove("dragging");
-        draggedCard = null;
-        saveTasks(); // save new order
-        console.log('dragging end');
+    if (!draggedCard) {
+        return;
     }
+    console.log('dragging end');
+    draggedCard.classList.remove("dragging");
+    draggedCard = null;
+
+    document
+        .querySelectorAll(".card")
+        .forEach(c => c.classList.remove("drag-hover"));
+
+    saveTasks();
 });
 
 taskList.addEventListener("dragover", (e) => {
     e.preventDefault();
-
-    const afterElement = getDragAfterElement(taskList, e.clientY);
-    // console.log(e.clientX, e.clientY);
     if (!draggedCard) return;
 
-    if (afterElement == null) {
-        taskList.appendChild(draggedCard);
+    const cards = [...taskList.querySelectorAll(".card")];
+
+    let hoveredCard = null;
+
+    cards.forEach(card => {
+        card.classList.remove("drag-hover");
+
+        const rect = card.getBoundingClientRect();
+
+        const insideX = e.clientX >= rect.left && e.clientX <= rect.right;
+        const insideY = e.clientY >= rect.top && e.clientY <= rect.bottom;
+
+        if (insideX && insideY) {
+            hoveredCard = card;
+        }
+    });
+
+    if (!hoveredCard) return;
+
+    // if (hoveredCard && hoveredCard !== draggedCard) {
+    //     hoveredCard.classList.add("drag-hover");
+    // }
+
+    hoveredCard.classList.add("drag-hover");
+
+    const rect = hoveredCard.getBoundingClientRect();
+    const isBelow = e.clientY > rect.top + rect.height / 2;
+
+    if (isBelow) {
+        taskList.insertBefore(draggedCard, hoveredCard.nextSibling);
     } else {
-        taskList.insertBefore(draggedCard, afterElement);
+        taskList.insertBefore(draggedCard, hoveredCard);
     }
+
+
+    // const afterElement = getDragAfterElement(taskList, e.clientY);
+    // // console.log(e.clientX, e.clientY);
+
+    // if (!draggedCard) return;
+
+    // if (afterElement == null) {
+    //     taskList.appendChild(draggedCard);
+    // } else {
+    //     taskList.insertBefore(draggedCard, afterElement);
+    // }
 });
+
+// document.addEventListener("mouseup", () => {
+//     if (activeDraggableTask) {
+//         activeDraggableTask.draggable = false;
+//         activeDraggableTask = null;
+//     }
+// });
+
+// dragHandle.addEventListener("mousedown", () => {
+//     task.draggable = true;
+//     activeDraggableTask = task;
+// });

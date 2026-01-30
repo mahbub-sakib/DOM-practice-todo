@@ -12,3 +12,14 @@
 .dark-theme .drag-handle {
     color: #fff;
 }
+
+.card.drag-hover {
+    outline: 2px dashed #3498db;
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+/* Dark mode */
+.dark-theme .card.drag-hover {
+    outline-color: #6cb6ff;
+    background-color: rgba(108, 182, 255, 0.1);
+}
