@@ -29,9 +29,9 @@ toggleBtn.addEventListener('click', () => {
 // #################### save all tasks in localStorage ##################
 function saveTasks() {
     const tasks = [];
+    console.log(this);
     document.querySelectorAll(".card input").forEach(input => {
         const value = input.value.trim();
-
         if (value !== "") {
             tasks.push(value);
         }
@@ -60,6 +60,17 @@ function loadTasks() {
     updateNoTaskText();
     checkSingleTask_and_handleRemoveBtn();
 }
+
+// ################### execute function after a delay #################
+function debounce(fn, delay = 300) {
+    let timer;
+
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+const debouncedSaveTasks = debounce(saveTasks, 300);
 
 function updateNoTaskText() {
     if (taskList.children.length === 0) {
@@ -130,7 +141,16 @@ function createTask(focus = true, value = "") {
     }
 
     // --- need to add debounced time when taking input ---
-    input.addEventListener("input", saveTasks);
+    // input.addEventListener("input", saveTasks);
+    input.addEventListener("input", debouncedSaveTasks);
+
+    // --- disable editing if clicked outside of input field ---
+    input.addEventListener("blur", () => {
+        if (input.value.trim() !== "") {
+            input.readOnly = true;
+            saveTasks();
+        }
+    });
 
     // --- prepare drag handle button ---
     const dragHandle = document.createElement("span");
@@ -162,6 +182,7 @@ function createTask(focus = true, value = "") {
 
     // --- Press Enter → create new task ---
     input.addEventListener('keydown', (e) => {
+        // console.log(e.target.value);
         if (e.key === 'Enter') {
             e.preventDefault();
             if (input.value.trim() !== "") {
