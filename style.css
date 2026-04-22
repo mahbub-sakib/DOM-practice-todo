@@ -220,3 +220,20 @@ button {
 .hidden {
     display: none;
 }
+
+.task-timer {
+    font-size: 11px;
+    color: #888;
+    white-space: nowrap;
+    background: #efefef;
+    padding: 3px 8px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    font-family: monospace;
+    transition: color 0.3s;
+}
+
+.dark-theme .task-timer {
+    background: #2a2a2a;
+    color: #aaa;
+}

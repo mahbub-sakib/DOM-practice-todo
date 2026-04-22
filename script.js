@@ -9,6 +9,29 @@ let currentEditingInput = null;
 let draggedCard = null;
 let activeDraggableTask = null;
 
+function createTaskTimer(timerEl, createdAt) {
+    // const createdAt = Date.now(); // closure variable
+
+    function getAge() {
+        const seconds = Math.floor((Date.now() - createdAt) / 1000);
+        if (seconds < 60) return `${seconds}s ago`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ${seconds % 60}s ago`;
+        const hours = Math.floor(minutes / 60);
+        return `${hours}h ${minutes % 60}m ago`;
+    }
+
+    timerEl.textContent = `⏱ ${getAge()}`; // show immediately, don't wait 1s
+
+    const intervalId = setInterval(() => {
+        timerEl.textContent = `⏱ ${getAge()}`;
+    }, 1000);
+
+    // return a stop function so we can clean up when card is removed
+    return function stopTimer() {
+        clearInterval(intervalId);
+    };
+}
 
 const savedTheme = localStorage.getItem("theme");
 if (savedTheme === "dark") {
@@ -29,11 +52,22 @@ toggleBtn.addEventListener('click', () => {
 // #################### save all tasks in localStorage ##################
 function saveTasks() {
     const tasks = [];
-    console.log(this);
-    document.querySelectorAll(".card input").forEach(input => {
+    // console.log(this);
+    // document.querySelectorAll(".card input").forEach(input => {
+    //     const value = input.value.trim();
+    //     if (value !== "") {
+    //         tasks.push(value);
+    //     }
+    // });
+    document.querySelectorAll(".card").forEach(card => {
+        const input = card.querySelector("input");
+        const timerEl = card.querySelector(".task-timer");
         const value = input.value.trim();
         if (value !== "") {
-            tasks.push(value);
+            tasks.push({
+                text: value,
+                createdAt: parseInt(timerEl.dataset.createdAt)
+            });
         }
     });
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -53,8 +87,14 @@ function loadTasks() {
         return;
     }
 
-    savedTasks.forEach((taskText, index) => {
-        createTask(false, taskText);
+    // savedTasks.forEach((taskText, index) => {
+    //     createTask(false, taskText);
+    // });
+
+    savedTasks.forEach(taskData => {
+        const text = typeof taskData === "string" ? taskData : taskData.text;
+        const createdAt = typeof taskData === "object" ? taskData.createdAt : Date.now();
+        createTask(false, text, createdAt);
     });
 
     updateNoTaskText();
@@ -83,7 +123,8 @@ function updateNoTaskText() {
 function checkSingleTask_and_handleRemoveBtn() {
     const totalCards = document.getElementsByClassName("card").length;
     const firstCard = document.querySelector(".card");
-    const firstCardBtn = firstCard.lastElementChild;
+    // const firstCardBtn = firstCard.lastElementChild;
+    const firstCardBtn = firstCard.querySelector('.remove-card-btn');
     if (totalCards === 1) {
         // console.log('1 ta card');
         firstCardBtn.classList.add("hidden");
@@ -125,7 +166,7 @@ function getDragAfterElement(container, y) {
 }
 
 // ##################### Create a single task ###################
-function createTask(focus = true, value = "") {
+function createTask(focus = true, value = "", createdAt = Date.now()) {
     const task = document.createElement('div');
     task.classList.add('card');
 
@@ -171,6 +212,7 @@ function createTask(focus = true, value = "") {
     removeBtn.textContent = "×";
 
     removeBtn.addEventListener('click', () => {
+        stopTimer();  // destroy timer closure
         task.remove();
         saveTasks();
         if (taskList.children.length === 0) {
@@ -204,10 +246,20 @@ function createTask(focus = true, value = "") {
         editTextarea.focus();
     });
 
+    // --- task age timer (closure) ---
+    const timerEl = document.createElement('span');
+    timerEl.classList.add('task-timer');
+    // timerEl.textContent = '⏱ 0s ago';
+    timerEl.dataset.createdAt = createdAt;  // store for saveTasks() to read
+    const stopTimer = createTaskTimer(timerEl, createdAt);
+
     task.appendChild(dragHandle);
     task.appendChild(input);
+
     task.appendChild(editBtn);
     task.appendChild(removeBtn);
+    task.appendChild(timerEl);
+
 
     task.draggable = false;
 
@@ -227,11 +279,11 @@ function createTask(focus = true, value = "") {
 
 loadTasks();
 // --- Create initial task ---
-if (taskList.children.length === 0) {
-    createTask();
-}
-updateNoTaskText();
-checkSingleTask_and_handleRemoveBtn();
+// if (taskList.children.length === 0) {
+//     createTask();
+// }
+// updateNoTaskText();
+// checkSingleTask_and_handleRemoveBtn();
 
 // --- Add new task button ---
 addCardBtn.addEventListener('click', createTask);
